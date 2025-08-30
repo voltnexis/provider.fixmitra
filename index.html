@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Portal - FixMitra by VoltNexis | Home Service Provider Dashboard</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="FixMitra by VoltNexis Provider Portal - Manage your home service requests efficiently. Join our network of trusted service providers for plumbing, electrical, AC repair, cleaning and more.">
+    <meta name="keywords" content="FixMitra, VoltNexis, home services, provider portal, plumbing, electrical, AC repair, home cleaning, appliance repair, service provider dashboard">
+    <meta name="author" content="VoltNexis">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Provider Portal - FixMitra by VoltNexis">
+    <meta property="og:description" content="Join FixMitra by VoltNexis as a service provider. Manage requests, connect with customers, and grow your home service business.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://provider.fixmitra.com">
+    <meta property="og:image" content="https://provider.fixmitra.com/assets/og-image.jpg">
+    <meta property="og:site_name" content="FixMitra by VoltNexis">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Provider Portal - FixMitra by VoltNexis">
+    <meta name="twitter:description" content="Professional home service provider platform. Join our network and manage your service requests efficiently.">
+    <meta name="twitter:image" content="https://provider.fixmitra.com/assets/twitter-image.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://provider.fixmitra.com">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FixMitra Provider Portal",
+      "description": "Professional home service provider management platform by VoltNexis",
+      "url": "https://provider.fixmitra.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "provider": {
+        "@type": "Organization",
+        "name": "VoltNexis",
+        "url": "https://voltnexis.com"
+      },
+      "offers": {
+        "@type": "Offer",
+        "category": "Home Services Management"
+      }
+    }
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <style>
+        .fade-in { opacity: 1; transition: opacity 0.3s ease-in-out; }
+        .fade-out { opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+        .premium-card { background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); }
+        .status-gradient { background: linear-gradient(45deg, #10b981, #059669); }
+        .nav-active { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Authentication Section -->
+    <div id="authSection" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-gray-900">Provider Portal</h2>
+                <p class="mt-2 text-gray-600">Manage your service requests efficiently</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="bg-white p-8 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-6">Sign In</h3>
+                <form onsubmit="loginProvider(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="loginEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="loginPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" id="providerLoginBtn" class="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
+                        Sign In
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button onclick="showRegisterForm()" class="text-blue-600 hover:underline">New provider? Register here</button>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="registerForm" class="bg-white p-8 rounded-lg shadow-md hidden">
+                <h3 class="text-xl font-semibold mb-6">Provider Registration</h3>
+                <form onsubmit="registerProvider(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                            <input type="text" id="companyName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                            <input type="text" id="providerName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Available Pincodes (comma-separated)</label>
+                        <input type="text" id="pincodes" required placeholder="e.g., 682001, 682002, 682003" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Service Categories</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="categories" value="Home Cleaning" class="mr-2">
+                                Home Cleaning
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="categories" value="AC Repair" class="mr-2">
+                                AC Repair
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="categories" value="Plumbing" class="mr-2">
+                                Plumbing
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="categories" value="Electrical Work" class="mr-2">
+                                Electrical Work
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="categories" value="Painting" class="mr-2">
+                                Painting
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="categories" value="Appliance Repair" class="mr-2">
+                                Appliance Repair
+                            </label>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input type="tel" id="providerPhone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">GSTIN (Optional)</label>
+                            <input type="text" id="gstin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="registerEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input type="password" id="registerPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                            <input type="password" id="confirmPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <button type="submit" id="providerRegisterBtn" class="w-full mt-6 py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300">
+                        Register as Provider
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button onclick="showLoginForm()" class="text-blue-600 hover:underline">Already have an account? Sign in</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="hidden min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="gradient-bg shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tie text-white text-lg"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-white">Provider Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <span id="providerName" class="text-white font-medium"></span>
+                        </div>
+                        <button onclick="logout()" class="px-4 py-2 bg-white bg-opacity-20 text-white hover:bg-opacity-30 rounded-lg transition duration-300">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+            <!-- Mobile Navigation (Horizontal) -->
+            <div class="md:hidden mb-6">
+                <div class="premium-card rounded-xl card-shadow p-3">
+                    <nav class="flex justify-around space-x-2">
+                        <button onclick="showSection('requests')" class="nav-btn-mobile flex-1 flex flex-col items-center px-3 py-3 rounded-xl nav-active text-white transition duration-300" title="Requests">
+                            <i class="fas fa-clipboard-list text-lg mb-1"></i>
+                            <span class="text-xs font-medium">Requests</span>
+                        </button>
+                        <button onclick="showSection('chats')" class="nav-btn-mobile flex-1 flex flex-col items-center px-3 py-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white transition duration-300" title="Chats">
+                            <i class="fas fa-comments text-lg text-purple-500 mb-1"></i>
+                            <span class="text-xs font-medium">Chats</span>
+                        </button>
+                        <button onclick="showSection('overall')" class="nav-btn-mobile flex-1 flex flex-col items-center px-3 py-3 rounded-xl hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition duration-300" title="Overall">
+                            <i class="fas fa-chart-bar text-lg text-green-500 mb-1"></i>
+                            <span class="text-xs font-medium">Overall</span>
+                        </button>
+                        <button onclick="showSection('profile')" class="nav-btn-mobile flex-1 flex flex-col items-center px-3 py-3 rounded-xl hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white transition duration-300" title="Profile">
+                            <i class="fas fa-user text-lg text-orange-500 mb-1"></i>
+                            <span class="text-xs font-medium">Profile</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="flex">
+                <!-- Sidebar - Desktop -->
+                <div class="hidden md:block w-64 premium-card rounded-xl card-shadow p-6 mr-8">
+                    <nav class="space-y-3">
+                        <button onclick="showSection('requests')" class="nav-btn w-full text-left px-4 py-3 rounded-xl nav-active text-white font-medium transition duration-300">
+                            <i class="fas fa-clipboard-list mr-3"></i>Requests
+                        </button>
+                        <button onclick="showSection('chats')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white transition duration-300">
+                            <i class="fas fa-comments mr-3 text-purple-500"></i>Chats
+                        </button>
+                        <button onclick="showSection('overall')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition duration-300">
+                            <i class="fas fa-chart-bar mr-3 text-green-500"></i>Overall
+                        </button>
+                        <button onclick="showSection('profile')" class="nav-btn w-full text-left px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white transition duration-300">
+                            <i class="fas fa-user mr-3 text-orange-500"></i>Profile
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Main Content -->
+                <div class="flex-1 min-w-0">
+                    <!-- Requests Section -->
+                    <div id="requestsSection" class="section">
+                        <div class="premium-card rounded-xl card-shadow p-4 md:p-6 mb-6 border-l-4 border-yellow-400">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-clock text-white text-sm"></i>
+                                </div>
+                                <h2 class="text-lg md:text-xl font-bold text-gray-800">Pending Requests</h2>
+                            </div>
+                            <div id="pendingRequests" class="space-y-3 md:space-y-4"></div>
+                        </div>
+                        
+                        <hr class="my-8">
+                        
+                        <div class="premium-card rounded-xl card-shadow p-4 md:p-6 mb-6 border-l-4 border-green-400">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-white text-sm"></i>
+                                </div>
+                                <h2 class="text-lg md:text-xl font-bold text-gray-800">Accepted Requests</h2>
+                            </div>
+                            <div id="acceptedRequests" class="space-y-3 md:space-y-4"></div>
+                        </div>
+                        
+                        <div class="premium-card rounded-xl card-shadow p-4 md:p-6 border-l-4 border-red-400">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-r from-red-400 to-pink-500 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-times text-white text-sm"></i>
+                                </div>
+                                <h2 class="text-lg md:text-xl font-bold text-gray-800">Rejected Requests</h2>
+                            </div>
+                            <div id="rejectedRequests" class="space-y-3 md:space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Chats Section -->
+                    <div id="chatsSection" class="section hidden">
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-bold mb-4">Active Chats</h2>
+                            <div id="chatsList" class="space-y-4"></div>
+                        </div>
+                        
+                        <!-- Chat Window -->
+                        <div id="chatWindow" class="bg-white rounded-lg shadow-md p-6 mt-6 hidden">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Chat with Customer</h3>
+                                <button onclick="closeChatWindow()" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div id="chatMessages" class="h-80 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4"></div>
+                            <div class="flex gap-2">
+                                <input type="text" id="messageInput" placeholder="Type your message..." class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onkeypress="handleMessageKeyPress(event)">
+                                <button onclick="sendMessage()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Section -->
+                    <div id="overallSection" class="section hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                            <div class="premium-card rounded-xl card-shadow p-4 md:p-6 border-l-4 border-yellow-400 hover:scale-105 transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="p-2 md:p-3 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
+                                        <i class="fas fa-clock text-white text-sm md:text-base"></i>
+                                    </div>
+                                    <div class="ml-3 md:ml-4">
+                                        <p class="text-xs md:text-sm font-medium text-gray-600">Pending</p>
+                                        <p id="pendingCount" class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-transparent">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="premium-card rounded-xl card-shadow p-4 md:p-6 border-l-4 border-blue-400 hover:scale-105 transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="p-2 md:p-3 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500">
+                                        <i class="fas fa-handshake text-white text-sm md:text-base"></i>
+                                    </div>
+                                    <div class="ml-3 md:ml-4">
+                                        <p class="text-xs md:text-sm font-medium text-gray-600">Accepted</p>
+                                        <p id="acceptedCount" class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="premium-card rounded-xl card-shadow p-4 md:p-6 border-l-4 border-red-400 hover:scale-105 transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="p-2 md:p-3 rounded-full bg-gradient-to-r from-red-400 to-pink-500">
+                                        <i class="fas fa-times text-white text-sm md:text-base"></i>
+                                    </div>
+                                    <div class="ml-3 md:ml-4">
+                                        <p class="text-xs md:text-sm font-medium text-gray-600">Rejected</p>
+                                        <p id="rejectedCount" class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-500 to-pink-600 bg-clip-text text-transparent">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="premium-card rounded-xl card-shadow p-4 md:p-6 border-l-4 border-green-400 hover:scale-105 transition duration-300">
+                                <div class="flex items-center">
+                                    <div class="p-2 md:p-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500">
+                                        <i class="fas fa-trophy text-white text-sm md:text-base"></i>
+                                    </div>
+                                    <div class="ml-3 md:ml-4">
+                                        <p class="text-xs md:text-sm font-medium text-gray-600">Completed</p>
+                                        <p id="completedCount" class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Stats Circle Chart -->
+                        <div class="premium-card rounded-xl card-shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-6 text-center">Request Overview</h3>
+                            <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8">
+                                <!-- Circle Chart -->
+                                <div class="relative">
+                                    <svg width="200" height="200" class="transform -rotate-90">
+                                        <circle cx="100" cy="100" r="80" fill="none" stroke="#f3f4f6" stroke-width="20"/>
+                                        <circle id="pendingCircle" cx="100" cy="100" r="80" fill="none" stroke="#f59e0b" stroke-width="20" stroke-dasharray="0 502" stroke-linecap="round" class="transition-all duration-1000"/>
+                                        <circle id="acceptedCircle" cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="20" stroke-dasharray="0 502" stroke-linecap="round" class="transition-all duration-1000"/>
+                                        <circle id="rejectedCircle" cx="100" cy="100" r="80" fill="none" stroke="#ef4444" stroke-width="20" stroke-dasharray="0 502" stroke-linecap="round" class="transition-all duration-1000"/>
+                                        <circle id="completedCircle" cx="100" cy="100" r="80" fill="none" stroke="#10b981" stroke-width="20" stroke-dasharray="0 502" stroke-linecap="round" class="transition-all duration-1000"/>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div id="totalCount" class="text-2xl font-bold text-gray-800">0</div>
+                                            <div class="text-sm text-gray-600">Total</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Legend -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-4 h-4 rounded-full bg-yellow-500"></div>
+                                        <span class="text-sm text-gray-700">Pending</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-4 h-4 rounded-full bg-blue-500"></div>
+                                        <span class="text-sm text-gray-700">Accepted</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-4 h-4 rounded-full bg-red-500"></div>
+                                        <span class="text-sm text-gray-700">Rejected</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-4 h-4 rounded-full bg-green-500"></div>
+                                        <span class="text-sm text-gray-700">Completed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Section -->
+                    <div id="profileSection" class="section hidden">
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-bold mb-4">Profile Settings</h2>
+                            <form onsubmit="updateProfile(event)">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                                        <input type="text" id="profileCompanyName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                                        <input type="text" id="profileProviderName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Available Pincodes</label>
+                                    <input type="text" id="profilePincodes" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div class="mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Service Categories</label>
+                                    <div class="grid grid-cols-2 gap-2" id="profileCategories">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="profileCats" value="Home Cleaning" class="mr-2">
+                                            Home Cleaning
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="profileCats" value="AC Repair" class="mr-2">
+                                            AC Repair
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="profileCats" value="Plumbing" class="mr-2">
+                                            Plumbing
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="profileCats" value="Electrical Work" class="mr-2">
+                                            Electrical Work
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="profileCats" value="Painting" class="mr-2">
+                                            Painting
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="profileCats" value="Appliance Repair" class="mr-2">
+                                            Appliance Repair
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                    Update Profile
+                                </button>
+                            </form>
+                            
+                            <div class="mt-8 pt-8 border-t">
+                                <button onclick="deleteAccount()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://imdrjtjlpuqdixvpdytk.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltZHJqdGpscHVxZGl4dnBkeXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMzExMTcsImV4cCI6MjA3MTYwNzExN30.Sa8UFkFyLKTL-JLzaojq9whdq3VjHFqxSVlWY_W4HkU';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3brs9fwpmiJemKQ2fxotB4A-cHM3J_8o",
+            authDomain: "my-chat-app-890.firebaseapp.com",
+            databaseURL: "https://my-chat-app-890-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "my-chat-app-890",
+            storageBucket: "my-chat-app-890.firebasestorage.app",
+            messagingSenderId: "493505638473",
+            appId: "1:493505638473:web:dcee0e34eb948f9448cf98",
+            measurementId: "G-K7M6M0E5BF"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        let currentProvider = null;
+        let currentChatId = null;
+        let unsubscribeChat = null;
+        let isLoggedIn = localStorage.getItem('providerLoggedIn') === 'true';
+        let providerData = JSON.parse(localStorage.getItem('providerData') || '{}');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isLoggedIn && providerData.email) {
+                currentProvider = providerData;
+                showDashboard();
+                loadRequests();
+            } else {
+                showAuth();
+            }
+        });
+
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showAuth() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('providerName').textContent = currentProvider.name || currentProvider.email;
+            loadProfileData();
+        }
+
+        async function loginProvider(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('providerLoginBtn');
+
+            // Set loading state
+            setButtonLoading(loginBtn, true, 'Signing In...');
+
+            try {
+                // Check provider in Supabase
+                const { data, error } = await supabaseClient
+                    .from('providers')
+                    .select('*')
+                    .eq('email', email)
+                    .single();
+
+                if (error || !data) {
+                    alert('Invalid credentials');
+                    return;
+                }
+
+                // Simple password check (in production, use proper hashing)
+                if (data.password !== password) {
+                    alert('Invalid credentials');
+                    return;
+                }
+
+                currentProvider = data;
+                isLoggedIn = true;
+                localStorage.setItem('providerLoggedIn', 'true');
+                localStorage.setItem('providerData', JSON.stringify(data));
+
+                showDashboard();
+                loadRequests();
+                console.log('Login successful!');
+
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            } finally {
+                setButtonLoading(loginBtn, false, 'Sign In');
+            }
+        }
+
+        async function registerProvider(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('registerEmail').value;
+            const phone = document.getElementById('providerPhone').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const registerBtn = document.getElementById('providerRegisterBtn');
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            const categories = Array.from(document.querySelectorAll('input[name="categories"]:checked'))
+                .map(cb => cb.value);
+
+            if (categories.length === 0) {
+                alert('Please select at least one service category');
+                return;
+            }
+
+            // Set loading state
+            setButtonLoading(registerBtn, true, 'Creating Account...');
+
+            try {
+                // Check if email already exists
+                const { data: existingEmail, error: emailError } = await supabaseClient
+                    .from('providers')
+                    .select('email')
+                    .eq('email', email)
+                    .single();
+
+                if (existingEmail) {
+                    throw new Error('Email already registered. Please use a different email.');
+                }
+
+                // Check if phone already exists
+                const { data: existingPhone, error: phoneError } = await supabaseClient
+                    .from('providers')
+                    .select('phone')
+                    .eq('phone', phone)
+                    .single();
+
+                if (existingPhone) {
+                    throw new Error('Phone number already registered. Please use a different phone number.');
+                }
+
+                const providerData = {
+                    company_name: document.getElementById('companyName').value,
+                    name: document.getElementById('providerName').value,
+                    pincodes: document.getElementById('pincodes').value,
+                    categories: categories.join(','),
+                    phone: phone,
+                    email: email,
+                    password: password,
+                    gstin: document.getElementById('gstin').value || null,
+                    status: 'active'
+                };
+
+                const { data, error } = await supabaseClient
+                    .from('providers')
+                    .insert([providerData]);
+
+                if (error) {
+                    console.error('Registration error:', error);
+                    throw new Error('Registration failed. Please try again.');
+                }
+
+                alert('Registration successful! Please login.');
+                showLoginForm();
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert(error.message);
+            } finally {
+                setButtonLoading(registerBtn, false, 'Register as Provider');
+            }
+        }
+
+        async function loadRequests() {
+            if (!currentProvider || currentProvider.status !== 'active') return;
+
+            try {
+                const providerPincodes = currentProvider.pincodes.split(',').map(p => p.trim());
+                const providerCategories = currentProvider.categories.split(',').map(c => c.trim());
+
+                // Load requests matching provider's pincodes and categories
+                const { data, error } = await supabaseClient
+                    .from('requests')
+                    .select('*')
+                    .in('pincode', providerPincodes)
+                    .in('category', providerCategories);
+
+                if (error) throw error;
+
+                const requests = data || [];
+                console.log('Fetched requests:', requests);
+                console.log('Provider pincodes:', providerPincodes);
+                console.log('Provider categories:', providerCategories);
+                
+                // Filter requests based on provider assignment
+                const pending = requests.filter(r => 
+                    r.status === 'Pending' && 
+                    (r.provider === 'default' || r.provider.includes(currentProvider.email))
+                );
+                const accepted = requests.filter(r => 
+                    r.status === 'Accepted' && 
+                    r.provider === currentProvider.email
+                );
+                const rejected = requests.filter(r => 
+                    r.status === 'Rejected' && 
+                    r.provider === currentProvider.email
+                );
+                const completed = requests.filter(r => 
+                    r.status === 'Completed' && 
+                    r.provider === currentProvider.email
+                );
+
+                renderPendingRequests(pending);
+                renderAcceptedRequests(accepted);
+                renderRejectedRequests(rejected);
+                updateStats(pending.length, accepted.length, rejected.length, completed.length);
+
+            } catch (error) {
+                console.error('Error loading requests:', error);
+            }
+        }
+
+        function renderPendingRequests(requests) {
+            const container = document.getElementById('pendingRequests');
+            container.innerHTML = '';
+
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No pending requests</p>';
+                return;
+            }
+
+            requests.forEach(request => {
+                const card = document.createElement('div');
+                card.className = 'border border-gray-200 rounded-lg p-4';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">${request.category}</h3>
+                            <p class="text-sm text-gray-600">ID: ${request.request_id}</p>
+                            <p class="text-sm text-gray-600">Pincode: ${request.pincode}</p>
+                            <p class="text-sm text-gray-600">Customer: ${request.customer_name}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="acceptRequest('${request.request_id}')" class="px-3 py-1 bg-green-600 text-white rounded text-sm">Accept</button>
+                            <button onclick="rejectRequest('${request.request_id}')" class="px-3 py-1 bg-red-600 text-white rounded text-sm">Reject</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderAcceptedRequests(requests) {
+            const container = document.getElementById('acceptedRequests');
+            container.innerHTML = '';
+
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No accepted requests</p>';
+                return;
+            }
+
+            requests.forEach(request => {
+                const card = document.createElement('div');
+                card.className = 'border border-gray-200 rounded-lg p-4';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">${request.category}</h3>
+                            <p class="text-sm text-gray-600">ID: ${request.request_id}</p>
+                            <p class="text-sm text-gray-600">Customer: ${request.customer_name}</p>
+                            <p class="text-sm text-gray-600">Phone: ${request.phone}</p>
+                            <p class="text-sm text-gray-600">Address: ${request.address}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="completeRequest('${request.request_id}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Complete</button>
+                            <button onclick="cancelRequest('${request.request_id}')" class="px-3 py-1 bg-gray-600 text-white rounded text-sm">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderRejectedRequests(requests) {
+            const container = document.getElementById('rejectedRequests');
+            container.innerHTML = '';
+
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No rejected requests</p>';
+                return;
+            }
+
+            requests.forEach(request => {
+                const card = document.createElement('div');
+                card.className = 'border border-gray-200 rounded-lg p-4 bg-gray-50';
+                card.innerHTML = `
+                    <div>
+                        <h3 class="font-semibold">${request.category}</h3>
+                        <p class="text-sm text-gray-600">ID: ${request.request_id}</p>
+                        <p class="text-sm text-gray-600">Pincode: ${request.pincode}</p>
+                        <p class="text-sm text-red-600">Status: Rejected</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function acceptRequest(requestId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('requests')
+                    .update({ 
+                        status: 'Accepted',
+                        provider: currentProvider.email,
+                        accepted_by: currentProvider.name
+                    })
+                    .eq('request_id', parseInt(requestId))
+                    .eq('status', 'Pending');
+
+                if (error) throw error;
+
+                alert('Request accepted successfully!');
+                loadRequests();
+
+            } catch (error) {
+                console.error('Error accepting request:', error);
+                alert('Failed to accept request');
+                loadRequests();
+            }
+        }
+
+        async function rejectRequest(requestId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('requests')
+                    .update({ 
+                        status: 'Rejected',
+                        provider: currentProvider.email
+                    })
+                    .eq('request_id', parseInt(requestId));
+
+                if (error) throw error;
+
+                alert('Request rejected');
+                loadRequests();
+
+            } catch (error) {
+                console.error('Error rejecting request:', error);
+                alert('Failed to reject request');
+            }
+        }
+
+        async function completeRequest(requestId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('requests')
+                    .update({ status: 'Completed' })
+                    .eq('request_id', parseInt(requestId));
+
+                if (error) throw error;
+
+                alert('Request marked as completed!');
+                loadRequests();
+
+            } catch (error) {
+                console.error('Error completing request:', error);
+                alert('Failed to complete request');
+            }
+        }
+
+        async function cancelRequest(requestId) {
+            if (!confirm('Are you sure you want to cancel this service?')) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('requests')
+                    .update({ status: 'Provider Cancelled' })
+                    .eq('request_id', parseInt(requestId));
+
+                if (error) throw error;
+
+                alert('Service cancelled');
+                loadRequests();
+
+            } catch (error) {
+                console.error('Error cancelling request:', error);
+                alert('Failed to cancel request');
+            }
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Remove active class from all nav buttons (desktop and mobile)
+            document.querySelectorAll('.nav-btn, .nav-btn-mobile').forEach(btn => {
+                btn.classList.remove('nav-active', 'text-white');
+                btn.classList.add('text-gray-700');
+            });
+
+            // Show selected section
+            document.getElementById(sectionName + 'Section').classList.remove('hidden');
+
+            // Add active class to clicked nav button (both desktop and mobile)
+            const desktopBtn = document.querySelector(`.nav-btn[onclick="showSection('${sectionName}')"]`);
+            const mobileBtn = document.querySelector(`.nav-btn-mobile[onclick="showSection('${sectionName}')"]`);
+            
+            if (desktopBtn) {
+                desktopBtn.classList.add('nav-active', 'text-white');
+                desktopBtn.classList.remove('text-gray-700');
+            }
+            if (mobileBtn) {
+                mobileBtn.classList.add('nav-active', 'text-white');
+                mobileBtn.classList.remove('text-gray-700');
+            }
+
+            if (sectionName === 'requests') {
+                loadRequests();
+            } else if (sectionName === 'chats') {
+                loadActiveChats();
+            }
+        }
+
+        function updateStats(pending, accepted, rejected, completed) {
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('acceptedCount').textContent = accepted;
+            document.getElementById('rejectedCount').textContent = rejected;
+            document.getElementById('completedCount').textContent = completed;
+            
+            // Update circle chart
+            updateStatsCircle(pending, accepted, rejected, completed);
+        }
+        
+        function updateStatsCircle(pending, accepted, rejected, completed) {
+            const total = pending + accepted + rejected + completed;
+            document.getElementById('totalCount').textContent = total;
+            
+            if (total === 0) {
+                // Reset all circles
+                document.getElementById('pendingCircle').style.strokeDasharray = '0 502';
+                document.getElementById('acceptedCircle').style.strokeDasharray = '0 502';
+                document.getElementById('rejectedCircle').style.strokeDasharray = '0 502';
+                document.getElementById('completedCircle').style.strokeDasharray = '0 502';
+                return;
+            }
+            
+            const circumference = 502; // 2 * π * 80
+            let currentOffset = 0;
+            
+            // Pending
+            const pendingLength = (pending / total) * circumference;
+            document.getElementById('pendingCircle').style.strokeDasharray = `${pendingLength} ${circumference}`;
+            document.getElementById('pendingCircle').style.strokeDashoffset = -currentOffset;
+            currentOffset += pendingLength;
+            
+            // Accepted
+            const acceptedLength = (accepted / total) * circumference;
+            document.getElementById('acceptedCircle').style.strokeDasharray = `${acceptedLength} ${circumference}`;
+            document.getElementById('acceptedCircle').style.strokeDashoffset = -currentOffset;
+            currentOffset += acceptedLength;
+            
+            // Rejected
+            const rejectedLength = (rejected / total) * circumference;
+            document.getElementById('rejectedCircle').style.strokeDasharray = `${rejectedLength} ${circumference}`;
+            document.getElementById('rejectedCircle').style.strokeDashoffset = -currentOffset;
+            currentOffset += rejectedLength;
+            
+            // Completed
+            const completedLength = (completed / total) * circumference;
+            document.getElementById('completedCircle').style.strokeDasharray = `${completedLength} ${circumference}`;
+            document.getElementById('completedCircle').style.strokeDashoffset = -currentOffset;
+        }
+
+        function loadProfileData() {
+            if (currentProvider) {
+                document.getElementById('profileCompanyName').value = currentProvider.company_name || '';
+                document.getElementById('profileProviderName').value = currentProvider.name || '';
+                document.getElementById('profilePincodes').value = currentProvider.pincodes || '';
+                
+                // Load categories
+                const categories = currentProvider.categories ? currentProvider.categories.split(',') : [];
+                document.querySelectorAll('input[name="profileCats"]').forEach(checkbox => {
+                    checkbox.checked = categories.includes(checkbox.value);
+                });
+            }
+        }
+
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const categories = Array.from(document.querySelectorAll('input[name="profileCats"]:checked'))
+                .map(cb => cb.value);
+
+            if (categories.length === 0) {
+                alert('Please select at least one service category');
+                return;
+            }
+            
+            const updatedData = {
+                company_name: document.getElementById('profileCompanyName').value,
+                name: document.getElementById('profileProviderName').value,
+                pincodes: document.getElementById('profilePincodes').value,
+                categories: categories.join(',')
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('providers')
+                    .update(updatedData)
+                    .eq('email', currentProvider.email);
+
+                if (error) throw error;
+
+                // Update local data
+                currentProvider = { ...currentProvider, ...updatedData };
+                localStorage.setItem('providerData', JSON.stringify(currentProvider));
+
+                alert('Profile updated successfully!');
+                loadRequests(); // Reload requests with new categories
+
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Failed to update profile');
+            }
+        }
+
+        function deleteAccount() {
+            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+            if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) return;
+
+            // In production, implement proper account deletion
+            alert('Account deletion feature will be implemented soon.');
+        }
+
+        async function loadActiveChats() {
+            if (!currentProvider) return;
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('requests')
+                    .select('*')
+                    .eq('status', 'Accepted')
+                    .eq('provider', currentProvider.email);
+                
+                if (error) throw error;
+                
+                const chatsList = document.getElementById('chatsList');
+                chatsList.innerHTML = '';
+                
+                if (data.length === 0) {
+                    chatsList.innerHTML = '<p class="text-gray-500">No active chats</p>';
+                    return;
+                }
+                
+                data.forEach(request => {
+                    const chatCard = document.createElement('div');
+                    chatCard.className = 'border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer';
+                    chatCard.onclick = () => openChatWindow(request.request_id, request.customer_name);
+                    
+                    chatCard.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-semibold">${request.customer_name}</h4>
+                                <p class="text-sm text-gray-600">${request.category} - ${request.request_id}</p>
+                            </div>
+                            <div class="text-blue-600">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                    chatsList.appendChild(chatCard);
+                });
+                
+            } catch (error) {
+                console.error('Error loading chats:', error);
+            }
+        }
+        
+        function openChatWindow(requestId, customerName) {
+            currentChatId = requestId;
+            document.getElementById('chatWindow').classList.remove('hidden');
+            document.querySelector('#chatWindow h3').textContent = `Chat with ${customerName}`;
+            loadChatMessages();
+        }
+        
+        function closeChatWindow() {
+            document.getElementById('chatWindow').classList.add('hidden');
+            if (unsubscribeChat) {
+                unsubscribeChat();
+                unsubscribeChat = null;
+            }
+            currentChatId = null;
+        }
+        
+        function loadChatMessages() {
+            if (!currentChatId) return;
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '<div class="text-center text-gray-500">Loading messages...</div>';
+            
+            // Listen for real-time messages
+            unsubscribeChat = db.collection('chats').doc(String(currentChatId)).collection('messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot((snapshot) => {
+                    messagesContainer.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const message = doc.data();
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `mb-3 ${message.sender === 'provider' ? 'text-right' : 'text-left'}`;
+                        
+                        const messageContent = document.createElement('div');
+                        messageContent.className = `inline-block max-w-xs p-3 rounded-lg ${
+                            message.sender === 'provider' 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-gray-200 text-gray-800'
+                        }`;
+                        messageContent.textContent = message.text;
+                        
+                        const timestamp = document.createElement('div');
+                        timestamp.className = 'text-xs text-gray-500 mt-1';
+                        timestamp.textContent = new Date(message.timestamp?.toDate()).toLocaleTimeString();
+                        
+                        messageDiv.appendChild(messageContent);
+                        messageDiv.appendChild(timestamp);
+                        messagesContainer.appendChild(messageDiv);
+                    });
+                    
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                });
+        }
+        
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentChatId) return;
+            
+            try {
+                await db.collection('chats').doc(String(currentChatId)).collection('messages').add({
+                    text: message,
+                    sender: 'provider',
+                    senderName: currentProvider.name,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                messageInput.value = '';
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message');
+            }
+        }
+        
+        function handleMessageKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function setButtonLoading(button, isLoading, text) {
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700');
+                button.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${text}`;
+            } else {
+                button.disabled = false;
+                button.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                if (button.id === 'providerLoginBtn') {
+                    button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                } else {
+                    button.classList.add('bg-green-600', 'hover:bg-green-700');
+                }
+                button.innerHTML = text;
+            }
+        }
+
+        function logout() {
+            if (unsubscribeChat) {
+                unsubscribeChat();
+            }
+            isLoggedIn = false;
+            currentProvider = null;
+            localStorage.removeItem('providerLoggedIn');
+            localStorage.removeItem('providerData');
+            showAuth();
+        }
+    </script>
+</body>
+</html>
