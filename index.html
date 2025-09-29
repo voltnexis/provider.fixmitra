@@ -1074,6 +1074,9 @@
         let unsubscribeChat = null;
         let isLoggedIn = localStorage.getItem('providerLoggedIn') === 'true';
         let providerData = JSON.parse(localStorage.getItem('providerData') || '{}');
+        let hasUnsavedChanges = false;
+        let originalProfileData = {};
+
 
         // Initialize EmailJS
         emailjs.init('UCB-e8RJIwpvJYao-');
@@ -1592,6 +1595,19 @@
         }
 
         function showSection(sectionName) {
+            // Check for unsaved changes when leaving profile section
+            if (hasUnsavedChanges && document.getElementById('profileSection').classList.contains('section') && !document.getElementById('profileSection').classList.contains('hidden')) {
+                showUnsavedChangesAlert(() => {
+                    hasUnsavedChanges = false;
+                    proceedToSection(sectionName);
+                });
+                return;
+            }
+            
+            proceedToSection(sectionName);
+        }
+        
+        function proceedToSection(sectionName) {
             // Hide all sections
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('hidden');
@@ -1675,6 +1691,12 @@
                 document.getElementById('profileCompanyName').value = currentProvider.company_name || '';
                 document.getElementById('profileProviderName').value = currentProvider.name || '';
                 document.getElementById('profilePincodes').value = currentProvider.pincodes || '';
+
+                // Store original data for comparison
+                storeOriginalProfileData();
+                
+                // Add change listeners to form fields
+                addProfileChangeListeners();
                 
                 // Load selection type and set appropriate radio button
                 const selectionType = currentProvider.selection_type || 'manual';
@@ -1738,6 +1760,96 @@
                     updateGalleryButtons();
                 }
             }
+        }
+
+        function storeOriginalProfileData() {
+            originalProfileData = {
+                company_name: document.getElementById('profileCompanyName').value,
+                name: document.getElementById('profileProviderName').value,
+                pincodes: document.getElementById('profilePincodes').value,
+                categories: Array.from(document.querySelectorAll('input[name="profileCats"]:checked')).map(cb => cb.value).join(','),
+                description: document.getElementById('profileDescription').value,
+                email_notifications: document.getElementById('emailNotifications').checked,
+                whatsapp_notifications: document.getElementById('whatsappNotifications').checked,
+                profile_picture: document.getElementById('profilePictureUrl').value,
+                work_photos: document.getElementById('workPhotosUrls').value
+            };
+        }
+        
+        function addProfileChangeListeners() {
+            const fields = [
+                'profileCompanyName', 'profileProviderName', 'profilePincodes', 
+                'profileDescription', 'emailNotifications', 'whatsappNotifications',
+                'profilePictureUrl', 'workPhotosUrls'
+            ];
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', checkForChanges);
+                    field.addEventListener('change', checkForChanges);
+                }
+            });
+            
+            // Add listeners for checkboxes
+            document.querySelectorAll('input[name="profileCats"]').forEach(checkbox => {
+                checkbox.addEventListener('change', checkForChanges);
+            });
+            
+            document.querySelectorAll('input[name="profilePincodeType"]').forEach(radio => {
+                radio.addEventListener('change', checkForChanges);
+            });
+        }
+        
+        function checkForChanges() {
+            const currentData = {
+                company_name: document.getElementById('profileCompanyName').value,
+                name: document.getElementById('profileProviderName').value,
+                pincodes: document.getElementById('profilePincodes').value,
+                categories: Array.from(document.querySelectorAll('input[name="profileCats"]:checked')).map(cb => cb.value).join(','),
+                description: document.getElementById('profileDescription').value,
+                email_notifications: document.getElementById('emailNotifications').checked,
+                whatsapp_notifications: document.getElementById('whatsappNotifications').checked,
+                profile_picture: document.getElementById('profilePictureUrl').value,
+                work_photos: document.getElementById('workPhotosUrls').value
+            };
+            
+            hasUnsavedChanges = JSON.stringify(currentData) !== JSON.stringify(originalProfileData);
+        }
+        
+        function showUnsavedChangesAlert(onDiscard) {
+            document.getElementById('modalIcon').innerHTML = '<i class="fas fa-exclamation-triangle text-white text-2xl"></i>';
+            document.getElementById('modalIcon').className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-gradient-to-r from-yellow-400 to-orange-500';
+            document.getElementById('modalTitle').textContent = 'Unsaved Changes';
+            document.getElementById('modalMessage').textContent = 'You have unsaved changes in your profile. Do you want to save them before leaving?';
+            document.getElementById('modalButtons').innerHTML = `
+                <button onclick="saveAndContinue()" class="btn-premium w-full mb-2">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+                <button onclick="discardAndContinue()" class="w-full py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors mb-2">
+                    <i class="fas fa-trash mr-2"></i>Discard Changes
+                </button>
+                <button onclick="closePremiumModal()" class="w-full py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+            `;
+            window.currentDiscardAction = onDiscard;
+            document.getElementById('premiumModal').classList.remove('hidden');
+        }
+        
+        function saveAndContinue() {
+            const form = document.querySelector('#profileSection form');
+            const event = new Event('submit', { bubbles: true, cancelable: true });
+            form.dispatchEvent(event);
+            closePremiumModal();
+        }
+        
+        function discardAndContinue() {
+            if (window.currentDiscardAction) {
+                window.currentDiscardAction();
+                window.currentDiscardAction = null;
+            }
+            closePremiumModal();
         }
         
         function toggleProfilePincodeInput() {
@@ -1930,7 +2042,11 @@
                 currentProvider = { ...currentProvider, ...updatedData };
                 localStorage.setItem('providerData', JSON.stringify(currentProvider));
 
-                alert('Profile updated successfully!');
+                // Reset unsaved changes flag and update original data
+                hasUnsavedChanges = false;
+                storeOriginalProfileData();
+
+                showSuccessModal('Profile Updated!', 'Your profile has been updated successfully.');
                 loadRequests(); // Reload requests with new categories
 
             } catch (error) {
